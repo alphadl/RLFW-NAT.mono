@@ -11,7 +11,7 @@ The pretrained English-Romanian model and their corresponding dict file can be d
 
 Dataset | Dict | Model
 ---|---|---  
-[WMT16 English-Romanian] | [dict (.zip)](https://drive.google.com/uc?id=1o1h5ZsTJOn4Tyb9l3aigqY7bsVXLtwC5) | [model (.zip)](https://drive.google.com/uc?id=1u-dFW6aQXHPs67gaD1GAtiIlo41aK3Py)  
+[WMT16 English-Romanian] | [dict (.zip)](https://drive.google.com/uc?id=1o1h5ZsTJOn4Tyb9l3aigqY7bsVXLtwC5) | [model (.zip)](https://drive.google.com/uc?id=1Y6DmB0XtbZ-bnK_nI9O0qDP0QrdWyvF2)  
 
 # License
 The license is CC-BY-NC 4.0.
