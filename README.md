@@ -2,7 +2,7 @@
 
 This repo contains the codes for our [ACL paper](https://aclanthology.org/2022.acl-long.172.pdf)
 
-> Redistributing Low-Frequency Words: Making the Most of Monolingual Data in Non-Autoregressive Translation
+> Redistributing Low-Frequency Words: Making the Most of Monolingual Data in Non-Autoregressive Translation  
 > Liang Ding, Longyue Wang, Shuming Shi, Dacheng Tao, Zhaopeng Tu
 
 
