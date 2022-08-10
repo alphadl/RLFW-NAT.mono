@@ -1,29 +1,23 @@
-#! /usr/bin/bash
+#!/usr/bin/env bash
+# Decode with Mask-Predict. DATA=databin, CHECKPOINT=dir with .pt, SUBSET=valid|test.
+set -e
+SRC="${SRC:-en}"
+TGT="${TGT:-de}"
+DATA="${DATA:?Set DATA=path/to/databin}"
+CHECKPOINT="${CHECKPOINT:?Set CHECKPOINT=path/to/checkpoint_dir}"
+SUBSET="${SUBSET:-valid}"
+CKPT="${CKPT:-checkpoint_best.pt}"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+OUT="${OUT:-$CHECKPOINT/gen}"
+mkdir -p "$OUT"
 
-s=$1
-t=$2
-task=$3
-
-if [ ! -d ./rst/${s}${t}/${task} ]; then
-  mkdir -p ./rst/${s}${t}/${task}
-fi
-
-echo ">>> validating"
-
-for file in ./checkpoint/${s}${t}/${task}/*.pt
-do
-  filename=$(basename $file)
-  echo ${filename} 'Translating...'
-  CUDA_VISIBLE_DEVICES=$4 python ./fairseq_mask/fairseq/fairseq_cli/generate.py $TASK_path \
-  --gen-subset valid \
-  --task translation_lev \
-  --path ./checkpoint/${s}${t}/${task}/${filename} \
-  --iter-decode-max-iter 10 \
-  --iter-decode-eos-penalty 0 \
-  --remove-bpe \
-  --iter-decode-with-beam 5 \
-  --print-step \
-  --iter-decode-force-max-iter \
-  --batch-size 30 > ./rst/${s}${t}/${task}/${filename}.out 2>&1 &
-  wait
-done
+echo ">>> validating $SUBSET"
+python "$ROOT/fairseq_mask/fairseq_cli/generate.py" "$DATA" \
+  --path "$CHECKPOINT/$CKPT" -s $SRC -t $TGT \
+  --gen-subset "$SUBSET" --task translation_lev \
+  --iter-decode-max-iter 10 --iter-decode-eos-penalty 0 \
+  --iter-decode-with-beam 5 --iter-decode-force-max-iter \
+  --remove-bpe --batch-size 64 --print-step \
+  > "$OUT/${SUBSET}.out" 2> "$OUT/${SUBSET}.log"
+grep ^H "$OUT/${SUBSET}.out" | cut -f3- > "$OUT/${SUBSET}.hyp"
+echo "Hyp: $OUT/${SUBSET}.hyp"

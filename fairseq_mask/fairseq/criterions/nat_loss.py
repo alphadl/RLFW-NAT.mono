@@ -136,7 +136,7 @@ class LabelSmoothedDualImitationCriterion(FairseqCriterion):
             logging_output[l["name"]] = (
                 utils.item(l["loss"].data / l["factor"])
                 if reduce
-                else l[["loss"]].data / l["factor"]
+                else l["loss"].data / l["factor"]
             )
 
         return loss, sample_size, logging_output

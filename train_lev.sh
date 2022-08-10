@@ -1,29 +1,21 @@
-#! /usr/bin/bash
-export MKL_SERVICE_FORCE_INTEL=1;
-export MKL_THREADING_LAYER=GNU;
-
-ps aux|grep /root/miniconda2/envs/py3.7/bin/python|awk '{print $2}'|xargs kill -9
-
-pip install -e ./fairseq_lev/
-
+#!/usr/bin/env bash
+# Train Levenshtein NAT on monolingual KD binarized data.
+# Env: SRC, TGT, DATA (path to binarized data), SAVE_DIR, [GPU].
 set -e
+SRC="${SRC:-en}"
+TGT="${TGT:-de}"
+DATA="${DATA:?Set DATA=path/to/databin}"
+SAVE_DIR="${SAVE_DIR:?Set SAVE_DIR=path/to/save}"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TASK_NAME="lev_$(basename "$DATA")"
+SAVE_DIR="${SAVE_DIR%/}"
+mkdir -p "$SAVE_DIR"
 
-s=$SRC
-t=$TGT
+pip install -e "$ROOT/fairseq_lev/"
 
-databin=${databin}
-task=lev_${databin}
-
-if [ ! -d ./checkpoint/${s}${t}/${task} ]; then
-  mkdir -p ./checkpoint/${s}${t}/${task}
-fi
-
-cp $0 model/${task}
-
-echo ">> training ${task}"
-
-nohup fairseq-train ${databin} \
-  --save-dir ./checkpoint/${s}${t}/${task} \
+echo ">> training Levenshtein on $DATA -> $SAVE_DIR"
+fairseq-train "$DATA" \
+  --save-dir "$SAVE_DIR" \
   --ddp-backend=no_c10d --fp16 \
   --task translation_lev \
   --criterion nat_loss \
@@ -48,15 +40,10 @@ nohup fairseq-train ${databin} \
   --seed 1 \
   --save-interval-updates 2000 \
   --keep-last-epochs 0 \
-  --fp16-scale-tolerance 0.1 >./checkpoint/${s}${t}/${task}/train.log 2>&1 &
-wait
+  --fp16-scale-tolerance 0.1
 
-
-# for small dataset e.g. en-ro, we just change following settings:
-#   --attention-dropout 0.3 \
-#   --activation-dropout 0.3 \
-#   --dropout 0.3 \
+# For small data (e.g. en-ro):
+#   --attention-dropout 0.3 --activation-dropout 0.3 --dropout 0.3 \
 #   --share-all-embeddings \
-#   --warmup-updates 4000--lr-period-updates 21000 \
-#   --max-update 25000 \
+#   --warmup-updates 4000 --lr-period-updates 21000 --max-update 25000 \
 #   --weight-decay 0.0001
